@@ -5,7 +5,12 @@
     <div class="list-pane" :style="{ width: listWidth + 'px' }">
       <div class="pane-header">
         <span class="section-label">Documents</span>
-        <button class="btn btn-primary btn-xs" @click="startNew">+ New</button>
+        <button class="btn-icon" title="New folder" @click="showNewFolder = true">
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M2 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+            <path d="M10 9v4M8 11h4"/>
+          </svg>
+        </button>
       </div>
 
       <div class="list-filters">
@@ -50,7 +55,8 @@
         <svg width="36" height="36" viewBox="0 0 20 20" fill="currentColor" style="color:var(--border-input)">
           <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
         </svg>
-        <span>Select a document to edit, or click <strong>+ New</strong></span>
+        <span>Select a document to edit or create a new one</span>
+        <button class="btn btn-primary btn-sm" @click="startNew">+ New Document</button>
       </div>
 
       <template v-else>
@@ -62,8 +68,9 @@
           <span v-if="formLoading" class="saving-hint">
             <span class="spinner spinner-sm"></span> Saving…
           </span>
+          <button class="btn btn-primary btn-sm" @click="startNew">+ New</button>
           <button v-if="!isNew" class="btn btn-primary btn-sm" :disabled="formLoading" @click="confirmDelete">Delete</button>
-          <button class="btn btn-ghost btn-sm" @click="resetForm">Reset</button>
+          <button class="btn btn-primary btn-sm" @click="resetForm">Reset</button>
           <button class="btn btn-primary btn-sm" :disabled="formLoading" @click="submit">
             {{ isNew ? 'Save' : 'Update' }}
           </button>
@@ -167,6 +174,46 @@
       </template>
     </div>
 
+
+    <!-- New Folder modal -->
+    <Teleport to="body">
+    <div v-if="showNewFolder" class="modal-backdrop" @click.self="showNewFolder = false">
+      <div class="modal-popup modal-popup-sm">
+        <div class="modal-header">
+          <span class="modal-header-title">New Folder</span>
+          <button type="button" class="modal-close" @click="showNewFolder = false">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="field">
+            <label class="field-label">Name</label>
+            <input
+              ref="newFolderInputEl"
+              v-model="newFolderName"
+              type="text"
+              class="input"
+              placeholder="Folder name"
+              @keydown.esc="showNewFolder = false"
+              @keydown.enter.prevent="addFolder"
+            />
+          </div>
+          <div class="field">
+            <label class="field-label">Parent Folder</label>
+            <select v-model="newFolderPid" class="select">
+              <option :value="null">— root —</option>
+              <option v-for="f in flatFolders" :key="f.id" :value="f.id">{{ f.path }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost btn-sm" @click="showNewFolder = false">Cancel</button>
+          <button type="button" class="btn btn-primary btn-sm"
+            :disabled="!newFolderName.trim() || newFolderLoading" @click="addFolder">
+            {{ newFolderLoading ? 'Adding…' : 'Add Folder' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
   </div>
 </template>
 
@@ -175,6 +222,7 @@ import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useFoldersStore } from '../stores/folders'
 import { useResize } from '../composables/useResize'
 import { listDocuments, getDocument, updateDocument, deleteDocument } from '../api/documents'
+import { createFolder } from '../api/folders'
 import { storeDocument } from '../api/store'
 import { listLanguages } from '../api/languages'
 import { scanOcr } from '../api/ocr'
@@ -384,6 +432,29 @@ async function confirmDelete() {
     await loadList()
   } catch { errorMsg.value = 'Delete failed.' }
   finally { formLoading.value = false }
+}
+
+// ── New Folder ────────────────────────────────────────────────────
+const showNewFolder = ref(false)
+const newFolderName = ref('')
+const newFolderPid = ref<number | null>(null)
+const newFolderLoading = ref(false)
+const newFolderInputEl = ref<HTMLInputElement | null>(null)
+
+watch(showNewFolder, v => { if (v) nextTick(() => newFolderInputEl.value?.focus()) })
+
+async function addFolder() {
+  const name = newFolderName.value.trim()
+  if (!name) return
+  newFolderLoading.value = true
+  try {
+    await createFolder(name, newFolderPid.value)
+    await foldersStore.load()
+    newFolderName.value = ''
+    newFolderPid.value = null
+    showNewFolder.value = false
+  } catch { /* ignore */ }
+  finally { newFolderLoading.value = false }
 }
 </script>
 

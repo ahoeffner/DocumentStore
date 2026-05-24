@@ -13,7 +13,7 @@
 
       <span v-if="voiceStatus" class="status-text" :class="{ listening: isListening }">{{ voiceStatus }}</span>
 
-      <button type="button" @click="showAdvanced = !showAdvanced" class="btn btn-ghost btn-sm adv-btn">
+      <button type="button" @click="showAdvanced = !showAdvanced" class="btn btn-primary btn-sm adv-btn">
         <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
         </svg>
@@ -25,7 +25,7 @@
         </svg>
       </button>
 
-      <button type="button" @click="chatStore.clear()" class="btn btn-ghost btn-sm">Clear</button>
+      <button type="button" @click="chatStore.clear()" class="btn btn-primary btn-sm">Clear</button>
     </div>
 
     <!-- Advanced row -->
@@ -51,25 +51,43 @@
           <div v-if="msg.documents && msg.documents.length" class="sources">
             <div class="sources-label">Sources</div>
             <div v-for="d in msg.documents" :key="d.id" class="source-row">
-              <span class="mono source-date">{{ d.date }}</span>
+              <span class="source-date">{{ d.date }}</span>
               <span class="source-title">{{ d.title }}</span>
-              <a :href="`/api/content/${d.id}/text`" target="_blank" class="source-link">text</a>
-              <a v-if="d.hasFile" :href="`/api/content/${d.id}/file`" target="_blank" class="source-link">
-                {{ d.filename }}
-              </a>
+              <div class="source-btns">
+                <button v-if="d.description" type="button" class="src-btn" @click="srcTextDoc = d">Text</button>
+                <span v-else class="src-btn src-btn-off">Text</span>
+                <a v-if="d.hasFile" :href="`/api/content/${d.id}/file`" target="_blank" class="src-btn">File</a>
+                <span v-else class="src-btn src-btn-off">File</span>
+              </div>
             </div>
           </div>
         </div>
       </template>
 
       <!-- Thinking indicator -->
-      <div v-if="loading" class="msg msg-ai">
+      <div v-if="loading" class="msg msg-ai msg-thinking">
         <span class="msg-sender">Assistant</span>
         <span class="thinking-dots">
-          <span></span><span></span><span></span>
+          <span class="td"></span><span class="td"></span><span class="td"></span>
+          <span class="thinking-label">Thinking…</span>
         </span>
       </div>
     </div>
+
+    <!-- Source text popup -->
+    <Teleport to="body">
+      <div v-if="srcTextDoc" class="modal-backdrop" @click.self="srcTextDoc = null">
+        <div class="modal-popup">
+          <div class="modal-header">
+            <span class="modal-header-title">{{ srcTextDoc.title }}</span>
+            <button type="button" class="modal-close" @click="srcTextDoc = null">✕</button>
+          </div>
+          <div class="modal-body">
+            <p class="modal-text">{{ srcTextDoc.description }}</p>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Input row -->
     <div class="input-row">
@@ -104,6 +122,8 @@ import { useCategoriesStore } from '../stores/categories'
 import { chat } from '../api/chat'
 import type { AxiosError } from 'axios'
 import type { DocumentResult } from '../types'
+
+const srcTextDoc = ref<DocumentResult | null>(null)
 
 const chatStore = useChatStore()
 const categoriesStore = useCategoriesStore()
@@ -261,7 +281,7 @@ function toggleMic() {
   border-radius: 6px;
 }
 .msg-ai  { align-self: flex-start; background: var(--bg); border: 1px solid var(--border); }
-.msg-user { align-self: flex-end; background: var(--text); color: #f8fafc; }
+.msg-user { align-self: flex-end; background: var(--tab-bg); border: 1px solid var(--tab-border); color: var(--text); }
 
 .msg-sender {
   font-size: 9px;
@@ -270,7 +290,7 @@ function toggleMic() {
   text-transform: uppercase;
   color: var(--text-faint);
 }
-.msg-user .msg-sender { color: var(--text-muted); }
+.msg-user .msg-sender { color: var(--text-faint); }
 
 .msg-text {
   font-size: 13px;
@@ -285,15 +305,47 @@ function toggleMic() {
   text-transform: uppercase; color: var(--text-faint); margin-bottom: 4px;
 }
 .source-row {
-  display: flex; align-items: center; gap: 6px;
-  padding: 2px 0; border-bottom: 1px solid var(--bg-muted); font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--bg-muted);
+  font-size: 11px;
 }
 .source-row:last-child { border-bottom: none; }
-.mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 10px; color: var(--text-faint); }
-.source-date { width: 80px; flex-shrink: 0; }
+.source-date {
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 10px;
+  color: var(--text-faint);
+  width: 80px;
+  flex-shrink: 0;
+}
 .source-title { flex: 1; min-width: 0; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.source-link { color: var(--accent); font-size: 11px; flex-shrink: 0; }
-.source-link:hover { text-decoration: underline; }
+.source-btns { display: flex; gap: 4px; flex-shrink: 0; }
+
+.src-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 18px;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.1s, color 0.1s;
+}
+.src-btn:hover { background: var(--accent); color: #fff; }
+.src-btn-off {
+  border-color: var(--border-input);
+  color: var(--text-faint);
+  cursor: default;
+  pointer-events: none;
+}
 
 /* ── Input row ── */
 .input-row {
@@ -342,23 +394,38 @@ function toggleMic() {
 .adv-btn { gap: 4px; }
 
 /* ── Thinking bubble ── */
+.msg-thinking {
+  border-color: var(--border-input);
+  border-left: 3px solid var(--border-input);
+  background: var(--bg-muted);
+}
+
 .thinking-dots {
   display: flex;
-  gap: 5px;
+  gap: 6px;
   align-items: center;
-  padding: 5px 2px;
+  padding: 6px 2px;
 }
-.thinking-dots span {
-  width: 7px;
-  height: 7px;
-  background: var(--text-faint);
+
+.td {
+  width: 10px;
+  height: 10px;
+  background: var(--text-muted);
   border-radius: 50%;
   animation: td-bounce 1.2s ease-in-out infinite;
 }
-.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
-.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+.td:nth-child(2) { animation-delay: 0.2s; }
+.td:nth-child(3) { animation-delay: 0.4s; }
+
+.thinking-label {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
 @keyframes td-bounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-  30% { transform: translateY(-5px); opacity: 1; }
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+  30% { transform: translateY(-6px); opacity: 1; }
 }
 </style>
