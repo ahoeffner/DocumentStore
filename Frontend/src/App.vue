@@ -2,7 +2,7 @@
   <div id="app">
 
     <header class="tab-bar">
-      <div class="brand">RAG Documents</div>
+      <div class="brand">Documents</div>
       <nav class="tabs">
         <button
           v-for="t in tabs"
