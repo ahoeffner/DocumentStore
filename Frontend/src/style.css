@@ -158,6 +158,13 @@ a { color: inherit; text-decoration: none; }
 }
 .btn-ghost:hover { background: var(--bg-muted); color: var(--text); }
 
+.btn-grey {
+  background: var(--tab-bg);
+  color: var(--text);
+  border-color: var(--tab-border);
+}
+.btn-grey:hover { background: var(--tab-hover-bg); }
+
 .btn-danger {
   background: var(--danger-bg);
   color: var(--danger);

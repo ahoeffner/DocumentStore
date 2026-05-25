@@ -140,12 +140,12 @@
               <div class="field">
                 <label class="field-label">Choose File</label>
                 <div class="file-row">
-                  <button type="button" class="btn btn-primary btn-sm" @click="fileInputRef?.click()">
+                  <button type="button" class="btn btn-grey btn-sm" @click="fileInputRef?.click()">
                     Choose File
                   </button>
                   <span class="file-chosen">{{ selectedFile ? selectedFile.name : 'No file chosen' }}</span>
                   <button type="button" @click="runOcr" :disabled="!ocrEnabled || ocrLoading"
-                    class="btn btn-ghost btn-sm">
+                    class="btn btn-grey btn-sm">
                     {{ ocrLoading ? '…' : 'OCR' }}
                   </button>
                   <input ref="fileInputRef" type="file" @change="onFileChange" style="display:none" />
