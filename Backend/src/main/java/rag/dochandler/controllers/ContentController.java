@@ -4,8 +4,8 @@ import java.io.IOException;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.MediaTypeFactory;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.web.bind.annotation.*;
 import rag.dochandler.repository.DocumentRepository;
 
@@ -36,15 +36,20 @@ public class ContentController
     public void getFile(@PathVariable long id, HttpServletResponse response) throws IOException
     {
         String filename = documentRepo.getFilename(id);
+
         if (filename == null)
         {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
+
         if (filename.startsWith("http://") || filename.startsWith("https://"))
+        {
             response.sendRedirect(filename);
-        else
-            response.sendRedirect("/api/content/" + id + "/file/" + filename);
+            return;
+        }
+
+        response.sendRedirect("/api/content/" + id + "/file/" + filename);
     }
 
 
@@ -53,9 +58,11 @@ public class ContentController
     {
         byte[] content = documentRepo.getContent(id);
         if (content == null) return(ResponseEntity.notFound().build());
+
         String contentType = MediaTypeFactory.getMediaType(filename)
             .map(MediaType::toString)
             .orElse(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
         return(ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_TYPE, contentType)
             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
@@ -67,15 +74,20 @@ public class ContentController
     public void download(@PathVariable long id, HttpServletResponse response) throws IOException
     {
         String filename = documentRepo.getFilename(id);
+
         if (filename == null)
         {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
+
         if (filename.startsWith("http://") || filename.startsWith("https://"))
+        {
             response.sendRedirect(filename);
-        else
-            response.sendRedirect("/api/content/" + id + "/download/" + filename);
+            return;
+        }
+
+        response.sendRedirect("/api/content/" + id + "/download/" + filename);
     }
 
 
@@ -84,9 +96,11 @@ public class ContentController
     {
         byte[] content = documentRepo.getContent(id);
         if (content == null) return(ResponseEntity.notFound().build());
+
         String contentType = MediaTypeFactory.getMediaType(filename)
             .map(MediaType::toString)
             .orElse(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
         return(ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_TYPE, contentType)
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")

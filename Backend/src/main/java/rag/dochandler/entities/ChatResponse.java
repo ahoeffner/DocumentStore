@@ -11,7 +11,9 @@ public class ChatResponse
     private boolean refresh;
 
 
-    public ChatResponse() {}
+    public ChatResponse()
+    {
+    }
 
 
     public boolean isSuccess()

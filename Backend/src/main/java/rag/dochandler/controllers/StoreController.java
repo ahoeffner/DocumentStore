@@ -23,8 +23,7 @@ public class StoreController
     private final GeminiService geminiService;
 
 
-    public StoreController(FileProcessorService processor, DocumentRepository documentRepo,
-                           GeminiService geminiService)
+    public StoreController(FileProcessorService processor, DocumentRepository documentRepo, GeminiService geminiService)
     {
         this.processor = processor;
         this.documentRepo = documentRepo;
@@ -33,14 +32,16 @@ public class StoreController
 
 
     @PostMapping
-    public ResponseEntity<CreateResponse> store(
-            @RequestParam String date,
-            @RequestParam String fldid,
-            @RequestParam String title,
-            @RequestParam(required = false) String text,
-            @RequestParam String language,
-            @RequestParam(required = false) MultipartFile file,
-            @RequestParam(required = false) String url)
+    public ResponseEntity<CreateResponse> store
+    (
+        @RequestParam String date,
+        @RequestParam String fldid,
+        @RequestParam String title,
+        @RequestParam(required = false) String text,
+        @RequestParam String language,
+        @RequestParam(required = false) MultipartFile file,
+        @RequestParam(required = false) String url
+    )
     {
         try
         {

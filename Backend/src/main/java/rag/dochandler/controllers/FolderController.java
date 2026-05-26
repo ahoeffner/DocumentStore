@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.List;
 import rag.dochandler.entities.Folder;
 import rag.dochandler.entities.Document;
-import rag.dochandler.model.DocumentRecord;
 import rag.dochandler.services.FolderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -10,8 +10,8 @@ import rag.dochandler.model.DocumentRecord;
 import rag.dochandler.entities.ChatResponse;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import rag.dochandler.repository.FolderRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import rag.dochandler.repository.DocumentRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,8 +32,7 @@ public class ChatService
     private final ObjectMapper mapper;
 
 
-    public ChatService(GeminiService geminiService, FolderRepository folderRepo,
-                       DocumentRepository documentRepo, ObjectMapper mapper)
+    public ChatService(GeminiService geminiService, FolderRepository folderRepo, DocumentRepository documentRepo, ObjectMapper mapper)
     {
         this.geminiService = geminiService;
         this.folderRepo = folderRepo;

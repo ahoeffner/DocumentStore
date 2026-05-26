@@ -48,6 +48,23 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import rag.dochandler.repository.CategoryRepository;
 ```
 
+## Method declarations — always one line
+
+Never split a method signature across multiple lines, unless length exceeds 80 characters:
+
+```java
+public DocumentRecord process(String date, String fldidStr, String title, String text, String language, MultipartFile file, String url) throws Exception
+{
+```
+
+Not:
+
+```java
+public DocumentRecord process(String date, String fldidStr, String title, String text,
+                              String language, MultipartFile file, String url) throws Exception
+{
+```
+
 ## Spacing
 
 Two blank lines after the import block, after class fields, and between methods:

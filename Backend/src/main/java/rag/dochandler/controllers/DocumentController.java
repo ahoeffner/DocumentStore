@@ -23,8 +23,7 @@ public class DocumentController
     private final GeminiService geminiService;
 
 
-    public DocumentController(FileProcessorService processor, DocumentRepository documentRepo,
-                              GeminiService geminiService)
+    public DocumentController(FileProcessorService processor, DocumentRepository documentRepo, GeminiService geminiService)
     {
         this.processor = processor;
         this.documentRepo = documentRepo;
@@ -33,10 +32,7 @@ public class DocumentController
 
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> list(
-            @RequestParam(required = false) Long fldid,
-            @RequestParam(required = false) String q,
-            @RequestParam(defaultValue = "200") int limit)
+    public ResponseEntity<Map<String, Object>> list(@RequestParam(required = false) Long fldid, @RequestParam(required = false) String q, @RequestParam(defaultValue = "200") int limit)
     {
         List<Document> documents = documentRepo.findAll(fldid, q, limit).stream()
             .map(this::toDocument)
@@ -55,23 +51,24 @@ public class DocumentController
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<CreateResponse> update(
-            @PathVariable long id,
-            @RequestParam(required = false) String date,
-            @RequestParam(required = false) String fldid,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String text,
-            @RequestParam(required = false) String language,
-            @RequestParam(required = false) MultipartFile file,
-            @RequestParam(required = false) String url)
+    public ResponseEntity<CreateResponse> update
+    (
+        @PathVariable long id,
+        @RequestParam(required = false) String date,
+        @RequestParam(required = false) String fldid,
+        @RequestParam(required = false) String title,
+        @RequestParam(required = false) String text,
+        @RequestParam(required = false) String language,
+        @RequestParam(required = false) MultipartFile file,
+        @RequestParam(required = false) String url
+    )
     {
         try
         {
             DocumentRecord existing = documentRepo.findByIdWithLang(id);
             if (existing == null) return(ResponseEntity.notFound().build());
 
-            String effectiveDate = date != null ? date
-                : (existing.getDate() != null ? existing.getDate().toString() : null);
+            String effectiveDate = date != null ? date : (existing.getDate() != null ? existing.getDate().toString() : null);
             String effectiveFldid = fldid != null ? fldid : String.valueOf(existing.getFldid());
             String effectiveTitle = title != null ? title : existing.getTitle();
             String effectiveLang = language != null ? language : existing.getLang();
@@ -84,8 +81,7 @@ public class DocumentController
             if (reprocess)
             {
                 String effectiveText = text != null ? text : existing.getText();
-                record = processor.process(effectiveDate, effectiveFldid, effectiveTitle,
-                                           effectiveText, effectiveLang, file, url);
+                record = processor.process(effectiveDate, effectiveFldid, effectiveTitle, effectiveText, effectiveLang, file, url);
             }
             else
             {
