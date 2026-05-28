@@ -20,7 +20,7 @@ CREATE TABLE documents.folders
 (
     id   serial      NOT NULL PRIMARY KEY,
     pid  integer,
-    name varchar(15) NOT NULL
+    name varchar(40) NOT NULL
 );
 
 

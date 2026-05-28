@@ -43,8 +43,8 @@ public class UserRepository
 
         return(jdbc.query
         (
-            "SELECT t.tenant FROM " + s + ".user_tenants t " +
-            "JOIN " + s + ".users u ON u.id = t.user_id " +
+            "SELECT t.tenant FROM " + s + ".tenants t " +
+            "JOIN " + s + ".users u ON u.id = t.uid " +
             "WHERE u.username = ?",
             (rs, i) -> rs.getString("tenant"), username
         ));
@@ -56,8 +56,8 @@ public class UserRepository
         String s = db.getUserStoreSchema();
 
         List<Boolean> results = jdbc.query(
-            "SELECT t.admin FROM " + s + ".user_tenants t " +
-            "JOIN " + s + ".users u ON u.id = t.user_id " +
+            "SELECT t.admin FROM " + s + ".tenants t " +
+            "JOIN " + s + ".users u ON u.id = t.uid " +
             "WHERE u.username = ? AND t.tenant = ?",
             (rs, i) -> rs.getBoolean("admin"), username, tenant
         );
@@ -116,8 +116,8 @@ public class UserRepository
 
         jdbc.update
         (
-            "INSERT INTO " + s + ".user_tenants (user_id, tenant, admin) VALUES (?, ?, ?) " +
-            "ON CONFLICT (user_id, tenant) DO UPDATE SET admin = EXCLUDED.admin",
+            "INSERT INTO " + s + ".tenants (uid, tenant, admin) VALUES (?, ?, ?) " +
+            "ON CONFLICT (uid, tenant) DO UPDATE SET admin = EXCLUDED.admin",
             userId, tenant, admin
         );
     }
@@ -129,7 +129,7 @@ public class UserRepository
 
         jdbc.update
         (
-            "DELETE FROM " + s + ".user_tenants WHERE user_id = ? AND tenant = ?",
+            "DELETE FROM " + s + ".tenants WHERE uid = ? AND tenant = ?",
             userId, tenant
         );
     }
@@ -141,7 +141,7 @@ public class UserRepository
         return(jdbc.query
         (
             "SELECT u.username, t.tenant, t.admin FROM " + s + ".users u " +
-            "LEFT JOIN " + s + ".user_tenants t ON t.user_id = u.id " +
+            "LEFT JOIN " + s + ".tenants t ON t.uid = u.id " +
             "ORDER BY u.username, t.tenant",
             (rs, i) -> new String[]{rs.getString("username"), rs.getString("tenant"), String.valueOf(rs.getBoolean("admin"))}
         ));
