@@ -114,6 +114,7 @@ async function submit() {
     // No tenant in URL — discover which tenants the user can access
     const res = await getTenants()
     if (res.tenants.length === 1) {
+      await switchTenant(res.tenants[0])
       await finalizeTenant(res.tenants[0])
     } else if (res.tenants.length > 1) {
       tenants.value = res.tenants
