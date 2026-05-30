@@ -93,7 +93,8 @@ const switchingTo = ref('')
 
 onMounted(() =>
 {
-  tenant.value = window.location.pathname.split('/').filter(Boolean)[0] ?? ''
+  const host = window.location.hostname
+  tenant.value = host === 'localhost' ? 'private' : host.split('.')[0]
   usernameInput.value?.focus()
 })
 
@@ -181,7 +182,6 @@ async function selectTenant(t: string)
 
 async function finalizeTenant(t: string, admin: boolean)
 {
-  history.pushState({}, '', '/' + t)
   tenant.value = t
   tenants.value = []
   auth.setLoggedIn(t, admin)

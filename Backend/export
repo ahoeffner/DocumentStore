@@ -1,0 +1,1 @@
+docker save -o documents.tar documents:latest
