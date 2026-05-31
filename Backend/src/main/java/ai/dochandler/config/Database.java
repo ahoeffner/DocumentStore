@@ -14,6 +14,7 @@ public class Database
 
     private final static Map<String, String> schemas = Map.of
     (
+        "home", "documents",
         "private", "documents",
         "slotsdalen", "slotsdalen"
     );

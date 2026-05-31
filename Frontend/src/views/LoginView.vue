@@ -116,7 +116,7 @@ async function submit()
     const result = await login(username.value, hashed, tenant.value || undefined)
     if (!result.success)
     {
-      error.value = result.message ?? 'Invalid credentials.'
+      error.value = `[${(result as any)._status}] ${result.message ?? '(no message)'}`
       return
     }
     if (tenant.value)

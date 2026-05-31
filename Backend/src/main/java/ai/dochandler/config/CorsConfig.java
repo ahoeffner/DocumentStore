@@ -23,7 +23,7 @@ public class CorsConfig implements WebMvcConfigurer
     public void addCorsMappings(CorsRegistry registry)
     {
         registry.addMapping("/api/**")
-            .allowedOrigins("http://localhost")
+            .allowedOriginPatterns("http://localhost", "http://localhost:*", "https://*.hoeffner.net")
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .allowedHeaders("*")
             .allowCredentials(true);

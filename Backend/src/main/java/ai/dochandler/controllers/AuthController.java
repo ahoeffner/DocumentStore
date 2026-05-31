@@ -2,7 +2,9 @@ package ai.dochandler.controllers;
 
 import java.util.Map;
 import java.util.List;
+import org.slf4j.Logger;
 import java.util.HashMap;
+import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpSession;
 import ai.dochandler.services.AuthService;
 import ai.dochandler.entities.LoginRequest;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController
 {
     private final AuthService service;
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
 
     public AuthController(AuthService service)
@@ -27,13 +30,21 @@ public class AuthController
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest req, HttpSession session)
     {
         boolean ok = service.login(req.username(), req.password(), req.tenant(), session);
-        if (!ok) return(ResponseEntity.status(401).body(Map.of("success", false, "message", "Invalid credentials or tenant")));
+
+        if (!ok)
+        {
+            log.warn("Login failed for user={} tenant={}", req.username(), req.tenant());
+            return(ResponseEntity.status(401).body(Map.of("success", false, "message", "Invalid credentials or tenant")));
+        }
+
+        log.info("Login successful: user={} tenant={}", req.username(), req.tenant());
+
         Map<String, Object> body = new HashMap<>();
         body.put("success", true);
-        if (session.getAttribute("tenant") != null)
-            body.put("admin", session.getAttribute("admin"));
-        else
-            body.put("tenants", service.getTenants(session));
+
+        if (session.getAttribute("tenant") != null) body.put("admin", session.getAttribute("admin"));
+        else body.put("tenants", service.getTenants(session));
+
         return(ResponseEntity.ok(body));
     }
 
@@ -59,6 +70,7 @@ public class AuthController
     {
         String tenant = (String) body.get("tenant");
         boolean ok = service.switchTenant(tenant, session);
+
         if (!ok) return(ResponseEntity.status(403).body(Map.of("success", false, "message", "Tenant not allowed")));
         return(ResponseEntity.ok(Map.of("success", true, "admin", session.getAttribute("admin"))));
     }
