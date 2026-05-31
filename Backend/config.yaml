@@ -1,0 +1,6 @@
+app:
+  hosts:
+    localhost: documents
+    home.hoeffner.net: documents
+    private.hoeffner.net: documents
+    slotsdalen.hoeffner.net: slotsdalen
