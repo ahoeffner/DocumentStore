@@ -19,6 +19,7 @@ app:
     api-key: YOUR_API_KEY_HERE
     prompts-file: ./prompts.yaml
     llm-model: gemini-2.5-flash-lite
+    fallback-model: gemini-2.5-flash
     embedding-model: models/gemini-embedding-001
     timeout-seconds: 300
     embedding-retries: 3
